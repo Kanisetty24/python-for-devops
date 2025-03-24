@@ -1,0 +1,45 @@
+import requests  # This module lets us make HTTP requests to APIs
+
+# 🔧 GitHub username or organization you want to check repos for
+GITHUB_USERNAME = "octocat"
+
+# 🔗 GitHub API URL to get public repos for that user/org
+BASE_URL = f"https://api.github.com/users/{GITHUB_USERNAME}/repos"
+
+# 📨 Send GET request to the GitHub API to fetch repos
+response = requests.get(BASE_URL)
+
+# 📦 Convert the JSON response to a Python list of dictionaries
+repos = response.json()
+
+# 🔁 Loop through each repository
+for repo in repos:
+    # 📝 Get the name of the repository
+    repo_name = repo['name']
+    print(f"\n🔍 Issues in repo: {repo_name}")
+    
+    # 📦 Construct the URL to get issues for this specific repo
+    issues_url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{repo_name}/issues"
+    
+    # 📨 Send GET request to fetch issues for the repo
+    issues_response = requests.get(issues_url)
+    
+    # 📦 Convert the issues JSON response into Python list
+    issues = issues_response.json()
+    
+    # ✅ Check if there are any issues
+    if issues:
+        for issue in issues:
+            # ❌ Skip pull requests (they also appear in issues API)
+            if 'pull_request' not in issue:
+                # 📝 Get issue title
+                title = issue['title']
+                
+                # 👤 Get the username of the person who opened the issue
+                author = issue['user']['login']
+                
+                # 📢 Print the result
+                print(f"📌 {title} (by {author})")
+    else:
+        # ℹ️ If no issues in repo
+        print("No open issues.")
